@@ -1,1 +1,1 @@
-Hello Jenkins Integration Test
+Checking the auto build trigger 
