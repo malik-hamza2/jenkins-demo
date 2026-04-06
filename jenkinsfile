@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKER_USER = 'humzaaa'
+        IMAGE_NAME = 'jenkins-app'
+    }
+
     stages {
 
         stage('Checkout') {
@@ -9,15 +14,23 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Build Image') {
             steps {
-                sh 'docker build -t my-app .'
+                sh 'docker build -t $DOCKER_USER/$IMAGE_NAME:latest .'
             }
         }
 
-        stage('Run Container') {
+        stage('Login to Docker Hub') {
             steps {
-                sh 'docker run my-app'
+                withCredentials([usernamePassword(credentialsId: 'docker-cred', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                    sh 'echo $PASS | docker login -u $USER --password-stdin'
+                }
+            }
+        }
+
+        stage('Push Image') {
+            steps {
+                sh 'docker push $DOCKER_USER/$IMAGE_NAME:latest'
             }
         }
     }
