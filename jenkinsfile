@@ -1,61 +1,12 @@
 pipeline {
-    agent any
-
-    environment {
-        DOCKER_USER = 'humzaaa'
-        IMAGE_NAME = 'jenkins-app'
-    }
+    agent { label 'new-agent' }
 
     stages {
-
-        stage('Checkout') {
+        stage('Test Agent') {
             steps {
-                git branch: 'main', url: 'https://github.com/malik-hamza2/jenkins-demo.git'
+                sh 'echo Running on new Jenkins Agent'
+                sh 'hostname'
             }
-        }
-
-        stage('Parallel Checks') {
-            parallel {
-                
-                stage('Test') {
-                    steps {
-                        sh 'python3 app.py'
-                    }
-                }
-
-                stage('Lint') {
-                    steps {
-                        sh 'echo "Lint check passed"'
-                    }
-                }
-            }
-        }
-
-        stage('Build Docker Image') {
-            steps {
-                sh 'docker build -t $DOCKER_USER/$IMAGE_NAME:latest .'
-            }
-        }
-
-        stage('Push Docker Image') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'docker-cred', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
-                    sh 'echo $PASS | docker login -u $USER --password-stdin'
-                }
-                sh 'docker push $DOCKER_USER/$IMAGE_NAME:latest'
-            }
-        }
-    }
-
-    post {
-        success {
-            echo 'Pipeline succeeded'
-        }
-        failure {
-            echo 'Pipeline failed'
-        }
-        always {
-            echo 'Pipeline finished'
         }
     }
 }
