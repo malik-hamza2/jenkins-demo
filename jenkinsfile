@@ -1,12 +1,53 @@
 pipeline {
-    agent { label 'new-agent' }
+    agent any
+
+    environment {
+        DOCKER_USER = 'your-username'
+        IMAGE_NAME = 'my-app'
+    }
 
     stages {
-        stage('Test Agent') {
+
+        stage('Checkout') {
             steps {
-                sh 'echo Running on new Jenkins Agent'
-                sh 'hostname'
+                git 'https://github.com/your-username/your-repo.git'
             }
+        }
+
+        stage('Test') {
+            steps {
+                sh 'python app.py'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t $DOCKER_USER/$IMAGE_NAME:latest .'
+            }
+        }
+
+        stage('Push to Docker Hub') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'docker-cred', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                    sh 'echo $PASS | docker login -u $USER --password-stdin'
+                }
+                sh 'docker push $DOCKER_USER/$IMAGE_NAME:latest'
+            }
+        }
+
+        stage('Deploy (Simulation)') {
+            steps {
+                sh 'docker run -d -p 5000:5000 $DOCKER_USER/$IMAGE_NAME:latest'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Deployment successfull'
+        }
+        failure {
+            echo 'Pipeline failed'
         }
     }
 }
