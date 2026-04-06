@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         DOCKER_USER = 'your-dockerhub-username'
-        IMAGE_NAME = 'my-app'
+        IMAGE_NAME = 'jenkins-app'
     }
 
     stages {
