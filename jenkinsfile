@@ -2,17 +2,11 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_USER = 'humzaaa'
+        DOCKER_USER = 'your-dockerhub-username'
         IMAGE_NAME = 'my-app'
     }
 
     stages {
-
-        stage('Checkout') {
-            steps {
-                git 'https://github.com/malik-hamza2/jenkins-demo.git'
-            }
-        }
 
         stage('Test') {
             steps {
@@ -44,7 +38,7 @@ pipeline {
 
     post {
         success {
-            echo 'Deployment successfull'
+            echo 'Deployment successful'
         }
         failure {
             echo 'Pipeline failed'
