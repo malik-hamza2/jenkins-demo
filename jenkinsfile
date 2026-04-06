@@ -16,7 +16,7 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t $DOCKER_USER/$IMAGE_NAME:latest .'
+                sh 'docker build -t $DOCKER_USER/$IMAGE_NAME:$BUILD_NUMBER .'
             }
         }
 
@@ -24,8 +24,8 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'docker-cred', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
                     sh 'echo $PASS | docker login -u $USER --password-stdin'
-                }
-                sh 'docker push $DOCKER_USER/$IMAGE_NAME:latest'
+                }s
+                 sh 'docker push $DOCKER_USER/$IMAGE_NAME:$BUILD_NUMBER'
             }
         }
 
@@ -34,7 +34,7 @@ pipeline {
                 sh '''
                 docker stop my-container || true
                 docker rm my-container || true
-                docker run -d --name my-container -p 5000:5000 $DOCKER_USER/$IMAGE_NAME:latest
+                docker run -d --name my-container -p 5000:5000 $DOCKER_USER/$IMAGE_NAME:$BUILD_NUMBER
                 '''
             }
         }
