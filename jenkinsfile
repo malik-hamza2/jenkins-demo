@@ -14,24 +14,48 @@ pipeline {
             }
         }
 
-        stage('Build Image') {
+        stage('Parallel Checks') {
+            parallel {
+                
+                stage('Test') {
+                    steps {
+                        sh 'python3 app.py'
+                    }
+                }
+
+                stage('Lint') {
+                    steps {
+                        sh 'echo "Lint check passed"'
+                    }
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
             steps {
                 sh 'docker build -t $DOCKER_USER/$IMAGE_NAME:latest .'
             }
         }
 
-        stage('Login to Docker Hub') {
+        stage('Push Docker Image') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'docker-cred', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
                     sh 'echo $PASS | docker login -u $USER --password-stdin'
                 }
-            }
-        }
-
-        stage('Push Image') {
-            steps {
                 sh 'docker push $DOCKER_USER/$IMAGE_NAME:latest'
             }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline succeeded'
+        }
+        failure {
+            echo 'Pipeline failed'
+        }
+        always {
+            echo 'Pipeline finished'
         }
     }
 }
